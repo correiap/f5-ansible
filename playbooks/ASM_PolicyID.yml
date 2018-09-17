@@ -1,7 +1,7 @@
 ---
 
 - name: Get ASM Policy ID and display its contents
-  hosts: bigip1.local
+  hosts: f5ansible.local
   gather_facts: no
   vars_prompt:
     - name: "USER"
