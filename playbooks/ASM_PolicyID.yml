@@ -1,0 +1,61 @@
+---
+
+- name: Get ASM Policy ID and display its contents
+  hosts: bigip1.local
+  gather_facts: no
+  vars_prompt:
+    - name: "USER"
+      prompt: "Enter F5 Username"
+      private: no
+    - name: "PASSWORD"
+      prompt: "Enter F5 Password"
+      private: yes
+    - name: "POLICY_NAME"
+      prompt: "Enter the ASM Policy Name"
+      private: no
+      
+
+  tasks:
+
+      - name: Assign Variables from YAML App File
+        include_vars: "./app-info/asm_info.yml" 
+          
+
+      - name: Get Authentication Token
+        uri:
+          url: "https://{{ HOSTNAME }}/mgmt/shared/authn/login"
+          body: '{"username": {{ USER }},"password": {{ PASSWORD }}, "loginProvidername":"tmos"}'
+          method: POST
+          return_content: yes
+          headers:
+                 Content-Type: "APPlication/json"
+          validate_certs: no
+        register: respData
+        delegate_to: localhost
+
+      - name: Assign Authentication Token to Variable 
+        set_fact:
+          F5_TOKEN: "{{respData.json.token.token}}"
+          
+      - name: GET ASM HASH
+        asm_getPolicyID:
+            mgmtip: "{{ HOSTNAME }}"
+            token: "{{ F5_TOKEN }}"
+            policy_name: "{{ POLICY_NAME }}"
+        delegate_to: localhost
+        register: asm_hash
+        
+      - name: Assign ASM Hash to Variable 
+        set_fact:
+          ASM_HASH: "{{asm_hash.ASM_Hash}}"
+        
+        
+      - name: Get facts from an ASM Policy - {{ POLICY_NAME }}
+        icontrol_gather_facts:
+          uri: "/mgmt/tm/asm/policies/{{ ASM_HASH }}"
+          host: "{{ HOSTNAME }}"
+          username: "{{ USER }}"
+          password: "{{ PASSWORD }}"
+        delegate_to: localhost
+        
+
