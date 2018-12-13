@@ -18,13 +18,13 @@
   tasks:
 
       - name: Assign Variables from YAML App File
-        include_vars: "./app-info/asm_info.yml" 
+        include_vars: "../app-info/asm_info.yml" 
           
 
       - name: Get Authentication Token
         uri:
           url: "https://{{ HOSTNAME }}/mgmt/shared/authn/login"
-          body: '{"username": {{ USER }},"password": {{ PASSWORD }}, "loginProvidername":"tmos"}'
+          body: '{"username": {{ USER }},"password": {{ PASSWORD }}, "loginProviderName":"tmos"}'
           method: POST
           return_content: yes
           headers:
