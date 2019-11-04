@@ -1,0 +1,23 @@
+---
+
+- name: Get F5 Info
+  hosts: f5_azure
+  gather_facts: no
+
+  tasks:
+
+      - name: Get Authentication Token
+        uri:
+          url: "https://myf5.westeurope.cloudapp.azure.com/mgmt/shared/authn/login"
+          body: '{"username": {{ USER }},"password": {{ PASSWORD }}, "loginProvidername":"tmos"}'
+          method: POST
+          return_content: yes
+          headers:
+                 Content-Type: "Application/json"
+          validate_certs: no
+        register: respData
+        delegate_to: localhost
+
+      - name: Assign Authentication Token to Variable 
+        set_fact:
+          F5_TOKEN: "{{respData.json.token.token}}"
